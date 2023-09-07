@@ -17,6 +17,8 @@ const apiHostname = process.env.API_HOSTNAME;
 // Middleware to parse JSON requests
 app.use(bodyParser.json());
 
+app.get('/',(req,res)=>res.json({message: "Test sample"}))
+
 // POST endpoint
 app.post('/v1/transactions', async (req, res) => {
   try {
@@ -27,6 +29,9 @@ app.post('/v1/transactions', async (req, res) => {
     res.status(500).json({ message: 'Internal Server Error' });
   }
 });
+
+// Start the server
+app.listen(port);
 
 const getBearerToken = async () => {
   const bearerTokenData = {
@@ -89,12 +94,15 @@ const newTransaction = async (bearerToken, data, res) => {
     response.on("end", () => {
       const body = Buffer.concat(chunks);
       console.log(body.toString());
-      res.json(JSON.parse(body.toString()));
+
+      // Return the same status code as the API response
+      res.status(response.statusCode).json(JSON.parse(body.toString()));
     });
 
     response.on("error", (error) => {
       console.error(error);
-      res.status(500).json({ message: 'API Call failed', error: error });
+      // Return the same status code as the API error response
+      res.status(response.statusCode || 500).json({ message: 'API Call failed', error: error });
     });
   });
 
